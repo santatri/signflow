@@ -7,7 +7,7 @@ import { getFile } from "@/modules/storage/service";
 
 export const dynamic = "force-dynamic";
 
-/** Sert le PDF au propriétaire uniquement. Aucun lien public : le fichier R2 n'est jamais exposé directement. */
+/** Sert le PDF au propriétaire uniquement. Aucun lien public : le stockage n'est jamais exposé directement. */
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;

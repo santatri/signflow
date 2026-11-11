@@ -80,25 +80,34 @@ Limites actuelles :
 | Type | Où | Exemple |
 |---|---|---|
 | Variables publiques | `wrangler.jsonc` (`vars`) / `.env.local` | `APP_URL`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY` |
-| Secrets locaux | `.dev.vars` (copie de `.dev.vars.example`, ignoré par Git) | `SESSION_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `TURNSTILE_SECRET_KEY` |
+| Variables locales | `.env.local` pour `next dev` / `.dev.vars` pour Wrangler local | `APP_URL`, `B2_ENDPOINT`, `B2_REGION`, `B2_BUCKET` |
+| Secrets locaux | `.dev.vars` (copie de `.dev.vars.example`, ignoré par Git) | `SESSION_SECRET`, `B2_KEY_ID`, `B2_APPLICATION_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `TURNSTILE_SECRET_KEY` |
 | Secrets de production | `npx wrangler secret put NOM` | idem |
 
 Ne jamais committer de secret. `.env.example` ne contient que des clés vides.
 
-## Configuration Cloudflare (actions manuelles)
+## Configuration Cloudflare et Backblaze B2
 
-Ces étapes n'ont **pas** été exécutées : elles demandent ton compte Cloudflare.
+Le déploiement utilise Cloudflare Workers et D1. Les fichiers sont stockés dans un bucket Backblaze B2 privé via son API S3 compatible ; aucun bucket R2 n'est requis.
 
 ```powershell
 npx wrangler login
 npx wrangler d1 create signflow-db
-npx wrangler r2 bucket create signflow-files
 ```
 
-Reporte ensuite le `database_id` affiché dans `wrangler.jsonc` (il contient actuellement un identifiant factice, valable uniquement pour le développement local).
+Reporte le vrai `database_id` affiché dans `wrangler.jsonc`, à la place de l'identifiant factice. La migration SQL est ensuite appliquée avec `npm run db:migrate:remote`.
 
-Bindings : `DB` (D1 `signflow-db`), `FILES` (R2 `signflow-files`), `ASSETS`.
-Les fichiers R2 sont privés ; aucun lien public permanent n'est créé.
+Dans Backblaze, crée une clé d'application limitée au bucket `signflow`, avec les permissions de lecture, écriture, suppression et liste nécessaires. Renseigne son Key ID et son Application Key comme secrets, jamais dans `wrangler.jsonc` :
+
+```powershell
+npx wrangler secret put B2_KEY_ID
+npx wrangler secret put B2_APPLICATION_KEY
+npx wrangler secret put SESSION_SECRET
+```
+
+Le compte B2 fourni utilise l'endpoint `https://s3.us-east-005.backblazeb2.com` et la région `us-east-005`, déjà configurés dans `wrangler.jsonc`. Les objets restent privés et ne sont servis qu'après vérification du propriétaire dans l'application.
+
+Le nom du Worker est `signflow`, donc son URL Workers prévue est `https://signflow.santatriniainafeno01.workers.dev` si le sous-domaine Workers de ce compte est bien `santatriniainafeno01`. `APP_URL` est défini sur cette URL.
 
 ## Migrations
 
@@ -116,7 +125,9 @@ Ne jamais appliquer une migration destructive en production sans sauvegarde et v
 npm run dev
 ```
 
-Les bindings D1/R2 sont simulés localement (Miniflare) : aucun compte Cloudflare requis. Pour tester le bundle Workers :
+Pour activer le stockage B2 en local, ajoute `B2_KEY_ID` et `B2_APPLICATION_KEY` dans `.env.local` (pour `next dev`) ou `.dev.vars` (pour Wrangler). Ces identifiants sont indispensables ; sans eux, les fonctions de stockage ne sont pas configurées.
+
+Pour tester avec les bindings D1 locaux et le runtime Workers :
 
 ```powershell
 npm run db:migrate:local

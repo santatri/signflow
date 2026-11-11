@@ -1,5 +1,7 @@
 # Copier vers .dev.vars (ignoré par Git) pour `opennextjs-cloudflare preview`
 SESSION_SECRET=
+B2_KEY_ID=
+B2_APPLICATION_KEY=
 RESEND_API_KEY=
 EMAIL_FROM=
 TURNSTILE_SECRET_KEY=

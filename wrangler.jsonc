@@ -10,7 +10,10 @@
   },
   "observability": { "enabled": true },
   "vars": {
-    "APP_URL": "http://localhost:3000"
+    "APP_URL": "https://signflow.santatriniainafeno01.workers.dev",
+    "B2_ENDPOINT": "https://s3.us-east-005.backblazeb2.com",
+    "B2_REGION": "us-east-005",
+    "B2_BUCKET": "signflow"
   },
   "d1_databases": [
     {
@@ -19,12 +22,6 @@
       // À remplacer par l'identifiant réel après `npx wrangler d1 create signflow-db`
       "database_id": "6c235adb-2adb-4237-8fd6-8cf6246bfff7",
       "migrations_dir": "drizzle/migrations"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "FILES",
-      "bucket_name": "signflow-files"
     }
   ]
 }

@@ -1,4 +1,5 @@
-import { getD1, getEnv, getR2 } from "@/lib/cloudflare/bindings";
+import { getB2Config, getD1, getEnv, getR2 } from "@/lib/cloudflare/bindings";
+import { checkStorageConnection } from "@/modules/storage/service";
 import { toErrorResponse } from "@/lib/utils/errors";
 
 export const dynamic = "force-dynamic";
@@ -17,10 +18,9 @@ async function checkDatabase(): Promise<ServiceState> {
 }
 
 async function checkStorage(): Promise<ServiceState> {
-  const bucket = getR2();
-  if (!bucket) return "not_configured";
+  if (!getB2Config() && !getR2()) return "not_configured";
   try {
-    await bucket.list({ limit: 1 });
+    await checkStorageConnection();
     return "connected";
   } catch {
     return "error";
