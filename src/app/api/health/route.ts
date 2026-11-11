@@ -22,7 +22,11 @@ async function checkStorage(): Promise<ServiceState> {
   try {
     await checkStorageConnection();
     return "connected";
-  } catch {
+  } catch (error) {
+    console.error("Storage health check failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message : "Unknown storage error",
+    });
     return "error";
   }
 }
