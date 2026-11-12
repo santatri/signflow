@@ -155,6 +155,15 @@ npm run cf:build      # build OpenNext (.open-next/worker.js)
 npm run deploy        # build + déploiement (après wrangler login et création des ressources)
 ```
 
+### Déploiement automatique via GitHub Actions
+
+Le workflow `.github/workflows/deploy.yml` vérifie lint, types et tests, puis déploie sur Cloudflare à chaque push sur `master` (ou lancement manuel depuis `master`). Dans les paramètres du dépôt GitHub, ajoute les secrets d'action suivants :
+
+- `CLOUDFLARE_API_TOKEN` : jeton Cloudflare avec les permissions de déploiement Workers et d'accès à la ressource D1 configurée.
+- `CLOUDFLARE_ACCOUNT_ID` : identifiant du compte Cloudflare.
+
+Les clés B2 et `SESSION_SECRET` restent des secrets du Worker sur Cloudflare ; elles ne sont pas nécessaires au workflow de build et ne doivent pas être ajoutées aux secrets GitHub.
+
 ## Dépannage
 
 - **`Error occurred prerendering page` au build** : supprimer le dossier `.next` puis relancer `npm run build`.
